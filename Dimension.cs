@@ -77,7 +77,7 @@ namespace Taiki
         #region Upsert helper functions
         public bool ContainsAttributeHierarchy(string attributeHierarchyName)
         {
-            AttributeHierarchy attr = new AttributeHierarchy(attributeHierarchyName, _name);
+            AttributeHierarchy attr = new AttributeHierarchy(_name, attributeHierarchyName);
 
             if (this.Contains(attr))
                 return true;
