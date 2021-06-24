@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>Taiki</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Martin Ignacio Alonso</Authors>
+    <Company>None</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AnalysisServices.AdomdClient.NetCore.retail.amd64" Version="19.22.0.1" />
+  </ItemGroup>
+
+</Project>
