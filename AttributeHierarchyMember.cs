@@ -36,12 +36,21 @@ namespace Taiki
             {
                 string uniqueName;
                 if (_memberType == AttributeHierarchyMemberType.Single)
-                    uniqueName = string.Format("[{0}].[{1}].&[{2}]", _dimensionName, _attributeHierarchyName, _from);
+                    uniqueName = string.Format("[{0}].[{1}].{3}[{2}]", _dimensionName, _attributeHierarchyName, _from, _valuesAsCaptions ? "" : "&");
                 else
-                    uniqueName = string.Format("[{0}].[{1}].&[{2}]:[{0}].[{1}].&[{3}]", _dimensionName, _attributeHierarchyName, _from == null ? "NULL" : _from, _to == null ? "NULL" : _to);
+                    uniqueName = string.Format("[{0}].[{1}].{4}[{2}]:[{0}].[{1}].{4}[{3}]", _dimensionName, _attributeHierarchyName, _from == null ? "NULL" : _from, _to == null ? "NULL" : _to, _valuesAsCaptions ? "" : "&");
                 return uniqueName;
             }
         }
+        #region ValuesAsCaptions Property
+        private bool _valuesAsCaptions = false;
+        public bool ValuesAsCaptions => _valuesAsCaptions;
+        public AttributeHierarchyMember AsCaptions()
+        {
+            _valuesAsCaptions = true;
+            return this;
+        }
+        #endregion
         public AttributeHierarchyMember(string dimensionName, string attributeHierarchyName, string from)
         {
             _dimensionName = dimensionName;
