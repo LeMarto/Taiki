@@ -90,9 +90,9 @@ namespace Taiki
                         foreach(IMeasure calculatedMeasure in batchMeasures.BatchFieldMeasures)
                         {
                             string batchMemberUniqueName = reader.IsDBNull(calculatedMeasure.Ordinal) ? null : reader.GetString(calculatedMeasure.Ordinal);
-                            attributeMemberValuesCurrentBatch.Add(new AttributeHierarchyMember(batchMemberUniqueName));
-                            AttributeHierarchyMember ahm = new AttributeHierarchyMember(batchMemberUniqueName);
-                            ApplyBatchFilter(fields, ahm);
+                            AttributeHierarchyMember attributeHierarchyMemberBatch = new AttributeHierarchyMember(batchMemberUniqueName, AttributeHierarchyMemberType.Single);
+                            attributeMemberValuesCurrentBatch.Add(attributeHierarchyMemberBatch);
+                            ApplyBatchFilter(fields, attributeHierarchyMemberBatch);
                         }
 
                         mdx = GenerateMDX(fields, measures);
@@ -193,7 +193,7 @@ namespace Taiki
                         sb.Append(tabulator.Get()); sb.Append(comma.Get()); sb.AppendLine("{");
                         tabulator.Inc(); innerComma.Reset();
                         
-                        foreach (IAttributeHierarchyMember filterValue in attr)
+                        foreach (AttributeHierarchyMember filterValue in attr)
                         {
                             sb.Append(tabulator.Get());
                             sb.Append(innerComma.Get());
@@ -229,7 +229,7 @@ namespace Taiki
                         sb.Append(tabulator.Get()); sb.Append(comma.Get()); sb.AppendLine("{");
                         tabulator.Inc(); innerComma.Reset();
                         
-                        foreach (IAttributeHierarchyMember filterValue in attr)
+                        foreach (AttributeHierarchyMember filterValue in attr)
                         {
                             sb.Append(tabulator.Get());
                             sb.Append(innerComma.Get());

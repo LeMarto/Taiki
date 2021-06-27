@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Taiki
 {
-    public class AttributeHierarchy : List<IAttributeHierarchyMember>, IEquatable<AttributeHierarchy>, ICloneable
+    public class AttributeHierarchy : List<AttributeHierarchyMember>, IEquatable<AttributeHierarchy>, IEquatable<string>, ICloneable
     {
         private string _dimensionName;
         #region Name Property
@@ -21,6 +21,11 @@ namespace Taiki
             get => _excludeMembers;
             set => _excludeMembers = value;
         }
+        public AttributeHierarchy AsExclusionFilter()
+        {
+            _excludeMembers = true;
+            return this;
+        }
         #endregion
         #region IncludeInRows Property 
         /*
@@ -32,6 +37,11 @@ namespace Taiki
         {
             get => _includeInRows;
             set => _includeInRows = value;
+        }
+        public AttributeHierarchy NotInRows()
+        {
+            _includeInRows = false;
+            return this;
         }
         #endregion
         #region UseForBatch Property
@@ -45,6 +55,11 @@ namespace Taiki
         {
             get => _useForBatch;
             set => _useForBatch = value;
+        }
+        public AttributeHierarchy AsBatch()
+        {
+            _useForBatch = true;
+            return this;
         }
         #endregion
         #region HasMembers Property
@@ -63,7 +78,13 @@ namespace Taiki
         }
         public bool Equals(AttributeHierarchy other)
         {
-            if (other._name == this._name)
+            if (_name == other._name)
+                return true;
+            return false;
+        }
+         public bool Equals(string attributeHierarchyName)
+        {
+            if (_name == attributeHierarchyName)
                 return true;
             return false;
         }
@@ -75,27 +96,58 @@ namespace Taiki
             clone._includeInRows = _includeInRows;
             clone._useForBatch = _useForBatch;
 
-            foreach (IAttributeHierarchyMember member in this)
+            foreach (AttributeHierarchyMember member in this)
             {
-                clone.Add((IAttributeHierarchyMember)member.Clone());
+                clone.Add((AttributeHierarchyMember)member.Clone());
             }
 
             return (object)clone;
         }
+
         #region Checks for Upserting filters
-        public bool ContainsMemberCaption(string caption)
+        public bool Contains(string caption)
         {
-            AttributeHierarchyMember memberSingle = new AttributeHierarchyMember(_dimensionName, _name, caption);
-            if (this.Contains(memberSingle))
+            AttributeHierarchyMember attributeHierarchyMember = new AttributeHierarchyMember(_dimensionName, _name, caption);
+            if (Contains(attributeHierarchyMember))
                 return true;
             return false;
         }
-        public bool ContainsMemberCaptionRange(string captionFrom, string captionTo)
+        public bool Contains(string from, string to)
         {
-            AttributeHierarchyMemberRange memberRange = new AttributeHierarchyMemberRange(_dimensionName, _name, captionFrom, captionTo);
-            if (this.Contains(memberRange))
+            AttributeHierarchyMember attributeHierarchyMemberRange = new AttributeHierarchyMember(_dimensionName, _name, from, to);
+            if (Contains(attributeHierarchyMemberRange))
                 return true;   
             return false;
+        }
+        #endregion
+        #region Add Functions
+        public AttributeHierarchyMember Add(string caption)
+        {
+            AttributeHierarchyMember attributeHierarchyMember;
+
+            if (!Contains(caption))
+            {
+                attributeHierarchyMember = new AttributeHierarchyMember(dimensionName: _dimensionName, attributeHierarchyName: _name, caption);
+                Add(attributeHierarchyMember);
+            }
+            else
+                attributeHierarchyMember = Find(a => a.From == caption && a.MemberType == AttributeHierarchyMemberType.Single);
+
+            return attributeHierarchyMember;
+        }
+        public AttributeHierarchyMember Add(string from, string to)
+        {
+            AttributeHierarchyMember attributeHierarchyMember;
+
+            if (!Contains(from, to))
+            {
+                attributeHierarchyMember = new AttributeHierarchyMember(dimensionName: _dimensionName, attributeHierarchyName: _name, from: from, to: to);
+                Add(attributeHierarchyMember);
+            }
+            else
+                attributeHierarchyMember = Find(a => a.From == from && a.To == to && a.MemberType == AttributeHierarchyMemberType.Range);
+
+            return attributeHierarchyMember;
         }
         #endregion
         public string ColumnName => String.Format("[{0}].[{1}].[{1}].[MEMBER_CAPTION]", _dimensionName, _name);

@@ -2,7 +2,13 @@ using System;
 
 namespace Taiki
 {
-    public class AttributeHierarchyMember : IEquatable<AttributeHierarchyMember>, IAttributeHierarchyMember
+    public enum AttributeHierarchyMemberType
+    {
+        Single,
+        Range
+    }
+
+    public class AttributeHierarchyMember : IEquatable<AttributeHierarchyMember>
     {
         #region DimensionName Property
         private string _dimensionName;
@@ -12,34 +18,64 @@ namespace Taiki
         private string _attributeHierarchyName;
         public string AttributeHierarchyName => _attributeHierarchyName;
         #endregion
-        #region Caption Property
-        private string _caption;
-        public string Caption => _caption;
+        #region From Property
+        private string _from;
+        public string From => _from;
         #endregion
-        public string UniqueName => string.Format("[{0}].[{1}].&[{2}]", _dimensionName, _attributeHierarchyName, _caption);
-        public AttributeHierarchyMember(string dimensionName, string attributeHierarchyName, string caption)
+        #region To Property
+        private string _to;
+        public string To => _to;
+        #endregion
+        #region MemberType Property
+        private AttributeHierarchyMemberType _memberType;
+        public AttributeHierarchyMemberType MemberType => _memberType;
+        #endregion
+        public string UniqueName 
         {
-            this._dimensionName = dimensionName;
-            this._attributeHierarchyName = attributeHierarchyName;
-            this._caption = caption;
+            get
+            {
+                string uniqueName;
+                if (_memberType == AttributeHierarchyMemberType.Single)
+                    uniqueName = string.Format("[{0}].[{1}].&[{2}]", _dimensionName, _attributeHierarchyName, _from);
+                else
+                    uniqueName = string.Format("[{0}].[{1}].&[{2}]:[{0}].[{1}].&[{3}]", _dimensionName, _attributeHierarchyName, _from == null ? "NULL" : _from, _to == null ? "NULL" : _to);
+                return uniqueName;
+            }
         }
-        public AttributeHierarchyMember(string uniqueName)
+        public AttributeHierarchyMember(string dimensionName, string attributeHierarchyName, string from)
         {
-            _dimensionName = uniqueName.Split("].[")[0];
-            _dimensionName = _dimensionName.Substring(1, _dimensionName.Length - 1);
-            _attributeHierarchyName = uniqueName.Split("].[")[1].Split("].&[")[0];
-            _caption = uniqueName.Split("].[")[1].Split("].&[")[1];
-            _caption = _caption.Substring(0, _caption.Length - 1);
+            _dimensionName = dimensionName;
+            _attributeHierarchyName = attributeHierarchyName;
+            _from = from;
+            _memberType = AttributeHierarchyMemberType.Single;
+        }  
+        public AttributeHierarchyMember(string dimensionName, string attributeHierarchyName, string from, string to)
+        {
+            if (from == null && to == null)
+                throw new Exception("You cant have a range that goes from null to null!");
+            _dimensionName = dimensionName;
+            _attributeHierarchyName = attributeHierarchyName;
+            _from = from;
+            _to = to;
+            _memberType = AttributeHierarchyMemberType.Range;
+        }
+        public AttributeHierarchyMember(string uniqueName, AttributeHierarchyMemberType membertype)
+        {
+            if (membertype == AttributeHierarchyMemberType.Single)
+            {
+                _dimensionName = uniqueName.Split("].[")[0];
+                _dimensionName = _dimensionName.Substring(1, _dimensionName.Length - 1);
+                _attributeHierarchyName = uniqueName.Split("].[")[1].Split("].&[")[0];
+                _from = uniqueName.Split("].[")[1].Split("].&[")[1];
+                _from = _from.Substring(0, _from.Length - 1);
+                _memberType = AttributeHierarchyMemberType.Single;
+            }
+            else
+                throw new NotImplementedException();
         }
         public object Clone() => this.MemberwiseClone();
 
         public bool Equals(AttributeHierarchyMember other)
-        {
-            if (other.UniqueName == this.UniqueName)
-                return true;
-            return false;
-        }
-        public bool Equals(IAttributeHierarchyMember other)
         {
             if (other.UniqueName == this.UniqueName)
                 return true;

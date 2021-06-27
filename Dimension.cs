@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Taiki
 {
-    public class Dimension : List<AttributeHierarchy>,  IEquatable<Dimension>, ICloneable
+    public class Dimension : List<AttributeHierarchy>,  IEquatable<Dimension>, IEquatable<string>, ICloneable
     {
         #region Name Property
         private string _name;
@@ -64,6 +64,13 @@ namespace Taiki
 
             return false;
         }
+        public bool Equals(string dimensionName)
+        {
+            if (this._name == dimensionName)
+                return true;
+
+            return false;
+        }
         public object Clone()
         {
             Dimension clone = new Dimension(_name);
@@ -74,15 +81,25 @@ namespace Taiki
 
             return (object)clone;
         }
-        #region Upsert helper functions
-        public bool ContainsAttributeHierarchy(string attributeHierarchyName)
+        public AttributeHierarchy Add(string attributeHierarchyName)
         {
-            AttributeHierarchy attr = new AttributeHierarchy(_name, attributeHierarchyName);
+            AttributeHierarchy attributeHierarchy;
 
-            if (this.Contains(attr))
-                return true;
+            if (!Contains(attributeHierarchyName))
+            {
+                attributeHierarchy = new AttributeHierarchy(Name, attributeHierarchyName);
+                Add(attributeHierarchy);
+            }
+            else
+                attributeHierarchy = Find(a=> a.Equals(attributeHierarchyName));
 
-            return false;
+            return attributeHierarchy;
+        }
+        #region Upsert helper functions
+        public bool Contains(string attributeHierarchyName)
+        {
+            AttributeHierarchy attributeHierarchy = Find(attr => attr.Name == attributeHierarchyName);
+            return attributeHierarchy != null;
         }
         #endregion
         /*

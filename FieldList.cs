@@ -106,42 +106,26 @@ namespace Taiki
         }
 
         #region Upsert helper functions
-        public bool ContainsDimension(string dimensionName)
+
+        public bool Contains(string dimensionName) 
         {
-            Dimension dim = new Dimension(dimensionName);
-
-            if (this.Contains(dim))
-                return true;
-
-            return false;
+            Dimension dimension = Find(d => d.Equals(dimensionName));
+            return dimension != null;
         }
         #endregion
-        public void Add(string dimensionName, string attributeHierarchyName)
+        public Dimension Add(string dimensionName)
         {
-            if (!ContainsDimension(dimensionName))
-                this.Add(new Dimension(dimensionName));
+            Dimension dimension;
 
-            Dimension dim = this.Find(dim => dim.Name == dimensionName);
+            if (!Contains(dimensionName))
+            {
+                dimension = new Dimension(dimensionName);
+                Add(dimension);
+            }
+            else
+                dimension = Find(d=> d.Equals(dimensionName));
 
-            if (!dim.ContainsAttributeHierarchy(attributeHierarchyName))
-                dim.Add(new AttributeHierarchy(dimensionName, attributeHierarchyName));
-        }
-        public void Add(string dimensionName, string attributeHierarchyName, string memberCaption)
-        {
-            Add(dimensionName, attributeHierarchyName);
-            AttributeHierarchy attr = this.Find(dim=>dim.Name == dimensionName).Find(attr=>attr.Name == attributeHierarchyName);
-
-            if (!attr.ContainsMemberCaption(memberCaption))
-                attr.Add(new AttributeHierarchyMember(dimensionName, attributeHierarchyName, memberCaption));
-        }
-
-        public void Add(string dimensionName, string attributeHierarchyName, string memberCaptionFrom, string memberCaptionTo)
-        {
-            Add(dimensionName, attributeHierarchyName);
-            AttributeHierarchy attr = this.Find(dim=>dim.Name == dimensionName).Find(attr=>attr.Name == attributeHierarchyName);
-
-            if (!attr.ContainsMemberCaptionRange(memberCaptionFrom, memberCaptionTo))
-                attr.Add(new AttributeHierarchyMemberRange(dimensionName, attributeHierarchyName, memberCaptionFrom, memberCaptionTo));
+            return dimension;
         }
     }
 }
