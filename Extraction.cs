@@ -226,15 +226,16 @@ namespace Taiki
                 {
                     foreach(AttributeHierarchy attr in dim.AttributeHierarchiesWithMembersToIncludeInWhereClause)
                     {
-                        sb.Append(tabulator.Get()); sb.Append(comma.Get()); sb.AppendLine("{");
+                        sb.Append(tabulator.Get()); sb.Append(comma.Get()); 
+                        if (attr.ExcludeMembers)
+                            sb.Append("-");
+                        sb.AppendLine("{");
                         tabulator.Inc(); innerComma.Reset();
                         
                         foreach (AttributeHierarchyMember filterValue in attr)
                         {
                             sb.Append(tabulator.Get());
                             sb.Append(innerComma.Get());
-                            if (attr.ExcludeMembers)
-                                sb.Append("-");
                             sb.AppendLine(filterValue.UniqueName);
                         }
                         
