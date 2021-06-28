@@ -57,6 +57,7 @@ namespace Taiki
 
             //create batches mdx
             string mdx = GenerateMDX(batchFields, batchMeasures);
+
             List<ExtractionBatch> batches = new List<ExtractionBatch>();
 
             try
@@ -71,14 +72,28 @@ namespace Taiki
 
                     AdomdDataReader reader = cmd.ExecuteReader();
                     
-                    //Get the ordinals for the calculated measures once
-                    foreach(IMeasure calculatedMeasure in batchMeasures.BatchFieldMeasures)
+                    //Get the ordinals for the measures once
+                    foreach(IMeasure measure in batchMeasures)
                     {
-                        calculatedMeasure.Ordinal = reader.GetOrdinal(calculatedMeasure.ColumnName);
+                        measure.Ordinal = reader.GetOrdinal(measure.ColumnName);
                     }
                     int id = 1;
                     while (reader.Read())
                     {
+                        bool allMeasuresNull = true;
+                        //Ignore records that contains all its measures as null...
+                        foreach(IMeasure measure in batchMeasures)
+                        {
+                            if (!reader.IsDBNull(measure.Ordinal))
+                            {
+                                allMeasuresNull = false;
+                                break;
+                            }
+                        }
+
+                        if (allMeasuresNull)
+                            continue;
+
                         //List containing Attribute Members Values used for batch
                         List<AttributeHierarchyMember> attributeMemberValuesCurrentBatch = new List<AttributeHierarchyMember>();
 
@@ -107,7 +122,7 @@ namespace Taiki
             catch (Exception e)
             {
                 if (retryAttempt > 10)
-                    throw new Exception(String.Format("Could not generate MDX: \"{0}\"", e.Message));
+                    throw new Exception(String.Format("Could not generate MDX. Exception \"{1}\" thrown. Message: \"{0}\"", e.GetType().ToString(), e.Message));
                 
                 Thread.Sleep(10000);
                 return GetBatchesMDX(++retryAttempt);
