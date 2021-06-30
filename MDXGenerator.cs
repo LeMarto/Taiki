@@ -7,7 +7,7 @@ using Microsoft.AnalysisServices.AdomdClient;
 
 namespace Taiki
 {
-    public class Extraction
+    public class MDXGenerator
     {
         public string ServerAddress;
         public string CubeName;
@@ -27,11 +27,11 @@ namespace Taiki
             attribute.Add(member);
         }
         
-        public ReadOnlyCollection<ExtractionBatch> GetBatchesMDX()
+        public ReadOnlyCollection<MDXBatchData> Generate()
         {
             return GetBatchesMDX(0);
         }
-        private ReadOnlyCollection<ExtractionBatch> GetBatchesMDX(int retryAttempt)
+        private ReadOnlyCollection<MDXBatchData> GetBatchesMDX(int retryAttempt)
         {
             //If the fields contain batch fields, set up everything
             if (!Fields.HasDimensionsWithBatchAttributes)
@@ -58,7 +58,7 @@ namespace Taiki
             //create batches mdx
             string mdx = GenerateMDX(batchFields, batchMeasures);
 
-            List<ExtractionBatch> batches = new List<ExtractionBatch>();
+            List<MDXBatchData> batches = new List<MDXBatchData>();
 
             try
             {
@@ -111,7 +111,7 @@ namespace Taiki
                         }
 
                         mdx = GenerateMDX(fields, measures);
-                        ExtractionBatch batch = new ExtractionBatch(id, mdx, ServerAddress, CubeName, CatalogName, attributeMemberValuesCurrentBatch.AsReadOnly());
+                        MDXBatchData batch = new MDXBatchData(id, mdx, attributeMemberValuesCurrentBatch.AsReadOnly());
                         batches.Add(batch);
                         id++;
                     }
@@ -129,11 +129,11 @@ namespace Taiki
             }
             return batches.AsReadOnly();
         }
-        private ReadOnlyCollection<ExtractionBatch> GetSingleMDX()
+        private ReadOnlyCollection<MDXBatchData> GetSingleMDX()
         {
             string mdx = GenerateMDX(Fields, Measures);
-            ExtractionBatch batch = new ExtractionBatch(1, mdx, ServerAddress, CubeName, CatalogName, null);
-            List<ExtractionBatch> batches = new List<ExtractionBatch>();
+            MDXBatchData batch = new MDXBatchData(1, mdx, null);
+            List<MDXBatchData> batches = new List<MDXBatchData>();
             batches.Add(batch);
             return batches.AsReadOnly();
         }
